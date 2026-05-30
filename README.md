@@ -11,30 +11,40 @@
 - **技术点：** 顶点波浪 | 扫描线脉冲 (Frac + Smoothstep) | 半透明混合 | 边缘光 Fresnel
 - **交互：** 扫描速度、颜色、透明度
 
-![全息投影](./video/qvanxi.gif)
+- [The code](Holiographic_projection.shader)
+ 
+ ![全息投影](./video/qvanxi.gif)
 
 ### 2. 力场护盾 (Force Shield)
 - **技术点：** 三层叠加渲染 (菲涅尔 + 网格纹理 + 相交高亮)
 - **协作亮点：** C# 物理碰撞检测 (ClosestPoint) 驱动 Shader 实时发光
 - **交互：** 护盾强度、相交光晕颜色/范围
 
-![力场护盾](./video/fanghuzhao.gif)
+- [The code](Fanghuzhao.shader)
+
+ ![力场护盾](./video/fanghuzhao.gif)
 
 ### 3. 深度边缘检测 (Sobel Edge Detection)
 - **技术点：** 全屏后处理 | Sobel 算子 | 深度纹理采样 | URP Renderer Feature
 - **交互：** 边缘线粗细、颜色、深度阈值
 
-![边缘检测](./video/miaobian.gif)
+- [The code](Miaobian.shader)
+  
+ ![边缘检测](./video/miaobian.gif)
 
 ### 4. 燃烧溶解 (Dissolve)
 - **技术点：** 噪声纹理采样 | Alpha Clip 丢弃 | 边缘发光
 - **交互：** 溶解进度、边缘宽度、燃烧颜色
 
-![溶解](./video/rongjie.gif)
+- [The code](rongjie.shader)
+
+ ![溶解](./video/rongjie.gif)
 
 ### 5. 动态顶点波浪 (Vertex Wave)
 - **技术点：** 顶点着色器正弦波位移 | 法线重计算
 - **交互：** 波高、频率、波长
+
+- [The code](Bolang.shader)
 
 ![顶点波浪](./video/bolang.gif)
 
@@ -42,21 +52,24 @@
 - **技术点：** 法线·视线点积 | Pow 衰减控制 | 多色渐变叠加
 - **交互：** 强度、指数、内外颜色
 
+- [The code](bIanyvanLight.shader)
+
 ![边缘光](./video/bianyvanlight.jpg)
 
 ---
 
-## 🧠 底层理解：自研软渲染器 (Java)
+## 底层理解：自研软渲染器 (Java)
 
 > 为深入理解 GPU 渲染管线原理，用 Java 从零实现了一个实时光栅化渲染器。
-> **仓库地址：** [你的软渲染器仓库链接]
+> [**仓库地址：** code](Simulatedeye.java)
 
 - **几何阶段：** 顶点变换 (Model → World → View → Clip) 、透视除法、视口映射
 - **光栅化：** 重心坐标插值、深度测试 (Z-Buffer)、背面剔除
 - **着色：** Blinn-Phong 光照模型、纹理采样与双线性过滤
 - **关键攻克：** 深刻理解了透视校正插值 (1/w 插值) 的数学原理，解决了纹理在透视下的扭曲问题
 
-> *注：为了验证图形学基础，放弃JNI技术封装win32库。使用 OpenGL/DirectX 等图形 API，仅依赖 Java 2D 做逐像素绘制。*
+- **重要方法：** drawedge和drawplance。drawedge仅对三角数据进行绘制边缘。drawplance则是进行完整渲染
+> *注：为了验证图形学基础，放弃JNI技术封装win32库、使用 OpenGL/DirectX 等图形 API，仅依赖 Java 2D 做逐像素绘制。*
 ---
 
 ## 🛠 技术栈
@@ -70,7 +83,7 @@
 
 ---
 
-## 📝 排坑日志 (Debugging Log)
+## 排坑日志 (Debugging Log)
 
 - **URP 深度纹理不稳定：** 通过 Frame Debugger 定位到 CopyDepth 与 DepthPrepass 机制冲突，确认了任何在 `BeforeRenderingOpaques` 请求深度的 Feature 都会导致复制中断。
 - **球面网格纹理替代：** 放弃在 Shader 内程序生成多边形纹理，改用外部贴图方案，解决了球面均匀网格难以映射的问题。
