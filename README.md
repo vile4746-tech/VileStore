@@ -60,13 +60,13 @@
 
 ## 底层理解：自研软渲染器 (Java)
 
-> 为深入理解 GPU 渲染管线原理，用 Java 从零实现了一个实时光栅化渲染器。
+> 为深入理解 GPU 渲染管线原理，用 Java 实现了一个实时光栅化渲染器。
 > [**仓库地址：** code](Simulatedeye.java)
 
 - **几何阶段：** 顶点变换 (Model → World → View → Clip) 、透视除法、视口映射
 - **光栅化：** 重心坐标插值、深度测试 (Z-Buffer)、背面剔除
-- **着色：** Blinn-Phong 光照模型、纹理采样与双线性过滤
-- **关键攻克：** 深刻理解了透视校正插值 (1/w 插值) 的数学原理，解决了纹理在透视下的扭曲问题
+- **着色：** 纹理采样
+- **关键攻克：** 深刻理解并实现透视校正插值 (1/w 插值) 的数学原理，解决了纹理在透视下的扭曲问题（见：199行始）
 
 - **重要方法：** drawedge和drawplance。drawedge仅对三角数据进行绘制边缘。drawplance则是进行完整渲染
 > *注：为了验证图形学基础，放弃JNI技术封装win32库、使用 OpenGL/DirectX 等图形 API，仅依赖 Java 2D 做逐像素绘制。*
@@ -77,7 +77,7 @@
 | 类别 | 掌握情况 |
 |------|---------|
 | **渲染管线** | URP 深度纹理机制、Frame Debugger 调试 |
-| **Shader 编写** | HLSL 顶点/片段着色器、多 Pass 叠加、后处理 |
+| **Shader 编写** | HLSL 顶点/片段着色器（少部分保留build-in管线）、多 Pass 叠加、后处理 |
 | **C# 脚本** | 物理碰撞检测与 Shader 传参 (SetVector/SetFloat) |
 | **编辑器与工具** | 自定义 Slider 实时控制、GitHub 版本管理 |
 
@@ -85,16 +85,16 @@
 
 ## 排坑日志 (Debugging Log)
 
-- **URP 深度纹理不稳定：** 通过 Frame Debugger 定位到 CopyDepth 与 DepthPrepass 机制冲突，确认了任何在 `BeforeRenderingOpaques` 请求深度的 Feature 都会导致复制中断。
+- **URP 深度纹理不稳定：** 通过 Frame Debugger 定位到 CopyDepth 与 DepthPrepass 机制冲突，确认了在 `BeforeRenderingOpaques` 请求深度的 Feature 会导致深度纹理异常。
 - **球面网格纹理替代：** 放弃在 Shader 内程序生成多边形纹理，改用外部贴图方案，解决了球面均匀网格难以映射的问题。
-- **相交高亮方案迭代：** 深度比较法受深度缓冲限制存在误触发，最终改用 `Collider.ClosestPoint` 结合 `SetVector` 传给 Shader 计算距离，实现了稳定可控的发光逻辑。
-- **GPU 架构认知：** 深刻理解了 GPU 无动态内存分配、SIMD 并行下的分支发散问题，优先用数学函数 (Smoothstep/Lerp) 替代 if 分支。
+- **相交高亮方案迭代：** 深度比较法受深度缓冲限制存在误触发，最终改用 `collision` 结合 `SetVector` 传给 Shader 计算距离，实现了稳定可控的发光逻辑。
+- **GPU 架构认知：** 了解到shader侧不适合像cpu那样的动态分配，尽量避免分支发散（像是逻辑分支权重不平衡，深度递归等），优先用数学函数 (Smoothstep/Lerp) 替代 if 分支。
 
 ---
 
 ## 🔮 下一步规划
 
-- 编辑器工具开发（自定义 Inspector、ScriptableObject 配置）
+- 推进编辑器工具开发（自定义 Inspector、ScriptableObject 配置）
 - 动画系统与 Shader 的联动优化
 - 更多顶点动画效果探索（模型爆炸、风格化变形）
 
