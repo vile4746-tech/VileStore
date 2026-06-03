@@ -72,6 +72,23 @@
 > *注：为了验证图形学基础，放弃JNI技术封装win32库、使用 OpenGL/DirectX 等图形 API，仅依赖 Java 2D 做逐像素绘制。*
 ---
 
+## 补：Editor工具
+
+### 1.game窗口截图
+> [The code](jietu.cs)
+
+### 2.批量重命名
+> [The code](rename.cs)
+
+### 3.资源筛选模板
+- 在私有函数isout写下判断语句，即可在窗口显示效果
+- [The code](resourcesFilter.cs)
+
+
+
+
+---
+
 ## 🛠 技术栈
 
 | 类别 | 掌握情况 |
